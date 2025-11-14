@@ -7,7 +7,7 @@ let isPaused = false;
 let currentPredictionSource = null;
 let currentFacingMode = 'environment'; 
 
-// Limites de Confiança (AJUSTADOS para maior tolerância)
+// Limites de Confiança (Mantidos com Maior Tolerância)
 const CONFIDENCE_THRESHOLD_SUGGESTION = 0.30; 
 const CONFIDENCE_THRESHOLD_CONFIRM = 0.85; 
 
@@ -72,7 +72,6 @@ async function startWebcam() {
         return;
     }
 
-    // Anexa o canvas gerado ao DOM
     document.getElementById("prediction-area").prepend(webcam.canvas);
     webcam.canvas.id = "webcam-canvas";
     webcamVideo.style.display = 'none'; 
@@ -90,13 +89,10 @@ function pauseWebcam() {
 
     if (webcam && webcam.canvas) {
         webcam.update();
-
         const snapshot = webcam.canvas.toDataURL('image/jpeg', 1.0);
-
         webcam.canvas.style.display = 'none';
         frozenImage.src = snapshot;
         frozenImage.style.display = 'block';
-
     }
 
     isPaused = true;
@@ -208,50 +204,74 @@ function handleImageUpload(event) {
 
 
 // ----------------------------------------------------
-// Funções de Descarte e Predição (Mapeamento de Plástico Forçado e Lógica Otimizada)
+// Funções de Descarte e Predição (Mapeamento Reforçado)
 // ----------------------------------------------------
 
 function getDisposalInfo(className) {
-    const lowerCaseName = className.toLowerCase();
+    const lowerCaseName = className.toLowerCase().trim();
 
-    // Rótulos que devem ser forçados como PLÁSTICO (VERMELHA)
-    const plasticForceLabels = ["não reciclável", "lixo comum", "outros lixos", "plástico"];
+    // Dicionário de Mapeamento Reforçado: 
+    // Usado para garantir que classes confusas ou ambíguas sejam mapeadas corretamente.
 
-    // 1. PLÁSTICO (e classes forçadas)
-    if (plasticForceLabels.some(label => lowerCaseName.includes(label))) {
+    // 1. **PAPEL/PAPELÃO (AZUL):** Prioriza rótulos que o modelo confunde com metal (Tetra Pak)
+    const paperLabels = ["papel", "papelao", "leite", "caixa", "embalagem", "jornal", "revista", "caixas"];
+    if (paperLabels.some(label => lowerCaseName.includes(label))) {
+        return { 
+            className: "disposal-papel", 
+            barClass: "bar-papel", 
+            material: "Papel/Papelão", 
+            color: "AZUL", 
+            icon: "fas fa-file-alt", 
+            instrucao: "Embalagens Tetra Pak e papel/papelão limpos. Não descarte papéis sujos." 
+        };
+    }
+
+    // 2. **PLÁSTICO (VERMELHA):** Inclui a classe "plástico" e as classes de lixo comum/não reciclável para forçar o descarte na lixeira VERMELHA, conforme sua lógica original.
+    const plasticLabels = ["plástico", "pote", "garrafa", "sacola", "nao reciclav", "lixo comum", "outros lixos", "rejeito"];
+    if (plasticLabels.some(label => lowerCaseName.includes(label))) {
         return {
             className: "disposal-plastico",
             barClass: "bar-plastico",
             material: "Plástico",
             color: "VERMELHA",
             icon: "fas fa-recycle",
-            instrucao: "Lave e seque antes de descartar. Não descarte plásticos que contenham produtos tóxicos."
+            instrucao: "Lave e seque. Não descarte plásticos com resíduos tóxicos. Lixo Comum/Rejeito deve ir na lixeira VERMELHA (Plástico) ou CINZA (depende da prefeitura)."
         };
     }
 
-    // 2. METAL (AMARELA)
-    if (lowerCaseName.includes("metal") || lowerCaseName.includes("metais")) {
-        return { className: "disposal-metal", barClass: "bar-metais", material: "Metal", color: "AMARELA", icon: "fas fa-cogs", instrucao: "Lave as latas e amasse para otimizar o espaço." };
+    // 3. **METAL (AMARELA):** const metalLabels = ["metal", "metais", "lata", "latinha", "ferro", "aluminio"];
+    if (metalLabels.some(label => lowerCaseName.includes(label))) {
+        return { 
+            className: "disposal-metal", 
+            barClass: "bar-metais", 
+            material: "Metal", 
+            color: "AMARELA", 
+            icon: "fas fa-cogs", 
+            instrucao: "Lave as latas e amasse. Cuidado com objetos pontiagudos." 
+        };
+    }
+    
+    // 4. **VIDRO (VERDE):**
+    const glassLabels = ["vidro", "garrafa", "pote", "copo"];
+    if (glassLabels.some(label => lowerCaseName.includes(label))) {
+        return { 
+            className: "disposal-vidro", 
+            barClass: "bar-vidro", 
+            material: "Vidro", 
+            color: "VERDE", 
+            icon: "fas fa-glass-martini", 
+            instrucao: "Descarte com segurança, em caixas ou embrulhado em jornal." 
+        };
     }
 
-    // 3. VIDRO (VERDE)
-    if (lowerCaseName.includes("vidro")) {
-        return { className: "disposal-vidro", barClass: "bar-vidro", material: "Vidro", color: "VERDE", icon: "fas fa-glass-martini", instrucao: "Descarte com segurança em caixas ou embrulhados (não use plástico filme)." };
-    }
-
-    // 4. PAPEL (AZUL)
-    if (lowerCaseName.includes("papel") || lowerCaseName.includes("papelao")) {
-        return { className: "disposal-papel", barClass: "bar-papel", material: "Papel/Papelão", color: "AZUL", icon: "fas fa-file-alt", instrucao: "Não descarte papéis molhados, sujos ou engordurados, eles são rejeitos." };
-    }
-
-    // 5. REJEITO/COMUM (CINZA/PRETA - Fallback)
+    // 5. **REJEITO/COMUM (Fallback Final)**
     return {
         className: "disposal-comum",
         barClass: "bar-comum",
         material: "Outros Resíduos",
         color: "CINZA ou PRETA",
         icon: "fas fa-trash-alt",
-        instrucao: "Este item deve ser descartado como lixo comum (rejeito ou orgânico)."
+        instrucao: "Este item não foi identificado ou se enquadra em rejeito (lixo comum/orgânico)."
     };
 }
 
@@ -293,6 +313,7 @@ async function predict(imageElement) {
     const topInfo = getDisposalInfo(topPrediction.className);
     const probability = topPrediction.probability;
 
+    // Garante que o contêiner receba a classe de descarte correta do item de maior probabilidade
     labelContainer.classList.add(topInfo.className);
 
     let messageHTML = '';
@@ -326,7 +347,6 @@ async function predict(imageElement) {
         `;
     } else {
         // NÍVEL 3: Abaixo de 30% (Fallback Otimizado)
-        // Se a confiança for muito baixa, mostra a predição principal, mas com alerta de inconclusivo.
         const fallbackInfo = getDisposalInfo("Outros Lixos"); 
         
         headerText = `❓Não tenho certeza: ${topInfo.material}`;
