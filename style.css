@@ -140,8 +140,8 @@ main {
     text-align: center;
 }
 
-/* ESTILO PARA AS IMAGENS E PARA O CANVAS DO TEABLE MACHINE (CORRIGIDO) */
-#webcam-canvas, /* Novo ID para o canvas injetado pelo JS */
+/* ESTILO PARA AS IMAGENS E PARA O CANVAS DO TEABLE MACHINE */
+#webcam-canvas, /* ID para o canvas injetado pelo JS */
 #uploaded-image,
 #frozen-image {
     object-fit: contain;
@@ -161,7 +161,7 @@ main {
 
 
 /* ---------------------------------------------------- */
-/* 4. Estilo das Barras de Predição (Mantido) */
+/* 4. Estilo das Barras de Predição */
 /* ---------------------------------------------------- */
 #bars-container {
     width: 100%;
@@ -237,7 +237,7 @@ main {
 
 
 /* ---------------------------------------------------- */
-/* 5. Contêiner de Mensagem Principal (Mantido) */
+/* 5. Contêiner de Mensagem Principal */
 /* ---------------------------------------------------- */
 
 .result-box {
