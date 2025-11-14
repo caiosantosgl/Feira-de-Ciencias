@@ -1,27 +1,36 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Descarte Inteligente - Classificação de Lixo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> 
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 </head>
+
 <body>
     <header>
-        <h1>♻️ Descarte Inteligente</h1>
+        <img src="img/reciclAILogo.png" id="Logo">
         <p>Use a câmera ou carregue uma imagem para classificar o tipo de lixo.</p>
     </header>
 
     <main>
         <div id="controls">
-            <button id="webcamButton" onclick="startWebcam()">
-                <i class="fas fa-camera"></i> Ativar Webcam
+            <button id="toggleCameraButton" onclick="toggleCameraDirection()" disabled">
+                <i class="fas fa-sync-alt"></i> 🔃
             </button>
+
+            <button id="webcamButton" onclick="startWebcam()">
+                <i class="fas fa-video"></i> Iniciar câmera
+            </button>
+
             <label class="custom-file-upload">
                 <input type="file" id="imageUpload" accept="image/*" onchange="handleImageUpload(event)">
                 <i class="fas fa-upload"></i> Carregar Imagem
@@ -29,22 +38,24 @@
         </div>
 
         <div id="prediction-area">
-            <video id="webcam-video" autoplay playsinline muted></video>
-            <img id="uploaded-image" style="display: none;"> 
+            <video id="webcam-video" autoplay playsinline muted style="display: none;"></video>
+            <img id="uploaded-image" style="display: none;">
 
-            <div id="bars-container">
-                </div>
+            <img id="frozen-image" style="display: none;">
+
+            <div id="bars-container"></div>
 
             <div id="label-container" class="result-box">
-                <p class="initial-message">Aguardando objeto...</p>
+                <p class="initial-message">Aguardando...</p>
             </div>
         </div>
     </main>
 
     <footer>
-        <p>&copy; 2025 Projeto Feira de Ciências. Desenvolvido para fins educativos. | Segue no insta: <a href="https://www.instagram.com/caiozn.y" target="_blank">Insta de Caio 🎓</a></p>
+        <p>&copy; 2025 Projeto Feira de Ciências. Desenvolvido para fins educativos.
     </footer>
 
     <script src="script.js"></script>
 </body>
+
 </html>

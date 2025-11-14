@@ -1,18 +1,27 @@
 /* Paleta de Cores de Reciclagem (Padrão CONAMA) */
 :root {
-    --color-primary: #4CAF50; /* Verde principal (Reciclagem) */
-    --color-secondary: #007bff; /* Azul secundário */
-    --color-background: #f0f8ff; /* Fundo leve, azul/branco */
+    --color-primary: #4CAF50;
+    /* Verde principal (Reciclagem) */
+    --color-secondary: #007bff;
+    /* Azul secundário */
+    --color-background: #f0f8ff;
+    /* Fundo leve, azul/branco */
     --color-text: #333;
     --color-card: #ffffff;
-    
+
     /* Cores das lixeiras (padrão CONAMA) */
-    --color-plastico: #e74c3c; /* Vermelho */
-    --color-metal: #f1c40f; /* Amarelo */
-    --color-vidro: #2ecc71; /* Verde */
-    --color-papel: #3498db; /* Azul */
-    --color-comum: #95a5a6; /* Cinza */
-    --color-inconclusivo: var(--color-comum); /* Alias para manter a clareza */
+    --color-plastico: #e74c3c;
+    /* Vermelho */
+    --color-metal: #f1c40f;
+    /* Amarelo */
+    --color-vidro: #2ecc71;
+    /* Verde */
+    --color-papel: #3498db;
+    /* Azul */
+    --color-comum: #95a5a6;
+    /* Cinza */
+    --color-inconclusivo: var(--color-comum);
+    /* Alias para manter a clareza */
 }
 
 /* 1. Reset e Tipografia (Mobile-First) */
@@ -23,7 +32,7 @@
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     background-color: var(--color-background);
     color: var(--color-text);
     padding: 15px;
@@ -41,7 +50,7 @@ header {
 
 h1 {
     color: var(--color-primary);
-    font-size: 2em; 
+    font-size: 2em;
     margin-bottom: 5px;
     animation: fadeIn 1s ease-out;
 }
@@ -53,20 +62,36 @@ header p {
 
 main {
     width: 100%;
-    max-width: 600px; /* Limite máximo para tablets/desktop */
+    max-width: 600px;
     flex-grow: 1;
 }
 
-/* 2. Controles (Botões) - Totalmente responsivo */
+/* 2. Controles (Botões) */
+/* 2. Controles (Botões) - MUDANÇA AQUI: de column para row */
 #controls {
     display: flex;
-    flex-direction: column; /* Pilha vertical em mobile */
-    gap: 15px;
-    margin-bottom: 30px;
-    padding: 10px 0;
+    flex-direction: row;
+    /* Força os botões LADO A LADO */
+    justify-content: center;
+    /* Centraliza horizontalmente */
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 5px 0;
 }
 
-#controls button, .custom-file-upload {
+/* Remova ou ajuste a media query, se necessário */
+@media (max-width: 599px) {
+
+    /* Esta regra só é necessária se você quiser quebrar para coluna em telas MUITO pequenas */
+    #controls {
+        flex-wrap: wrap;
+        /* Permite quebrar, se o espaço acabar */
+        font-size: 0.9em;
+    }
+}
+
+#controls button,
+.custom-file-upload {
     flex: 1;
     padding: 15px;
     border: none;
@@ -82,15 +107,26 @@ main {
 #webcamButton {
     background-color: var(--color-primary);
     color: white;
+    font-family: 'Montserrat', sans-serif;
 }
 
+#toggleCameraButton {
+    background-color: #555;
+    /* Cinza escuro para alternar */
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+
+}
+
+
 .custom-file-upload {
-    display: block; 
+    display: block;
     background-color: var(--color-secondary);
     color: white;
 }
 
-#controls button:hover, .custom-file-upload:hover {
+#controls button:hover,
+.custom-file-upload:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
@@ -112,19 +148,25 @@ main {
     text-align: center;
 }
 
-#webcam-video, #uploaded-image {
+#webcam-video,
+#uploaded-image,
+#frozen-image {
+    /* ... (outras regras de tamanho existentes) ... */
+
+    /* Regras para ajuste de imagem: */
+    object-fit: contain;
+    /* Faz a imagem se ajustar (redimensionar) dentro do contêiner, mantendo a proporção. */
     width: 100%;
     max-width: 100%;
+    aspect-ratio: 1 / 1;
     height: auto;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: block; 
+    border-radius: 8px;
+    margin: 0 auto 10px auto;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-
 /* ---------------------------------------------------- */
-/* 4. Estilo das Barras de Predição (NOVO) */
+/* 4. Estilo das Barras de Predição */
 /* ---------------------------------------------------- */
 #bars-container {
     width: 100%;
@@ -143,14 +185,13 @@ main {
 }
 
 .class-label {
-    width: 100px; /* Reduzido para melhor visualização em mobile */
+    width: 100px;
     text-align: right;
     font-weight: 600;
     padding-right: 10px;
     text-transform: capitalize;
     color: var(--color-text);
-    /* Quebra de linha se o rótulo for longo (ex: Papel/Papelão) */
-    word-break: break-word; 
+    word-break: break-word;
     line-height: 1.2;
 }
 
@@ -178,12 +219,26 @@ main {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Estilos de cor para as barras (baseados nas cores das lixeiras) */
-.bar-vidro { background-color: var(--color-vidro); }
-.bar-papel { background-color: var(--color-papel); }
-.bar-plastico { background-color: var(--color-plastico); }
-.bar-metais { background-color: var(--color-metal); }
-.bar-comum { background-color: var(--color-comum); }
+/* Estilos de cor para as barras */
+.bar-vidro {
+    background-color: var(--color-vidro);
+}
+
+.bar-papel {
+    background-color: var(--color-papel);
+}
+
+.bar-plastico {
+    background-color: var(--color-plastico);
+}
+
+.bar-metais {
+    background-color: var(--color-metal);
+}
+
+.bar-comum {
+    background-color: var(--color-comum);
+}
 
 
 /* ---------------------------------------------------- */
@@ -210,11 +265,31 @@ main {
 }
 
 /* Estilos dinâmicos de cor para a borda do resultado final */
-.disposal-plastico { border-color: var(--color-plastico); background-color: rgba(231, 76, 60, 0.05); }
-.disposal-metal { border-color: var(--color-metal); background-color: rgba(241, 196, 15, 0.05); }
-.disposal-vidro { border-color: var(--color-vidro); background-color: rgba(46, 204, 113, 0.05); }
-.disposal-papel { border-color: var(--color-papel); background-color: rgba(52, 152, 219, 0.05); }
-.disposal-comum, .disposal-inconclusivo { border-color: var(--color-comum); background-color: rgba(149, 165, 166, 0.05); }
+.disposal-plastico {
+    border-color: var(--color-plastico);
+    background-color: rgba(231, 76, 60, 0.05);
+}
+
+.disposal-metal {
+    border-color: var(--color-metal);
+    background-color: rgba(241, 196, 15, 0.05);
+}
+
+.disposal-vidro {
+    border-color: var(--color-vidro);
+    background-color: rgba(46, 204, 113, 0.05);
+}
+
+.disposal-papel {
+    border-color: var(--color-papel);
+    background-color: rgba(52, 152, 219, 0.05);
+}
+
+.disposal-comum,
+.disposal-inconclusivo {
+    border-color: var(--color-comum);
+    background-color: rgba(149, 165, 166, 0.05);
+}
 
 
 .result-header {
@@ -223,56 +298,38 @@ main {
     animation: slideInUp 0.5s ease-out;
 }
 
-.disposal-text {
-    font-weight: 600;
-    color: var(--color-text); /* Cor de texto padrão para instruções */
-}
-
-/* 6. Animações */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideInUp {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-/* 7. Footer */
-footer {
-    margin-top: 30px;
-    padding: 10px;
-    color: #999;
-    font-size: 0.8em;
-    text-align: center;
-    width: 100%;
-}
-
-footer a {
-    color: var(--color-primary);
-    text-decoration: none;
-}
-
-/* 8. Media Query para Desktop/Tablet (Responsividade) */
+/* 8. Media Query para Desktop/Tablet */
 @media (min-width: 600px) {
     h1 {
         font-size: 2.5em;
     }
+
     #controls {
-        flex-direction: row; /* Volta para lado a lado */
+        flex-direction: row;
         justify-content: center;
-        max-width: 500px;
+        max-width: 600px;
         margin-left: auto;
         margin-right: auto;
     }
+
     .class-label {
-        width: 120px; /* Mais espaço para os rótulos em tela maior */
+        width: 120px;
     }
+}
+
+#Logo {
+    max-height: 175px;
+}
+
+#toggleCameraButton {
+    max-width: 100px;
+}
+
+.result-header {
+    font-size: 30px;
+}
+
+footer {
+    font-size: 0.8em;
+    font-weight: 500;
 }
