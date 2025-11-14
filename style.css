@@ -140,8 +140,8 @@ main {
     text-align: center;
 }
 
-/* ESTILO PARA AS IMAGENS E PARA O CANVAS DO TEABLE MACHINE */
-#webcam-canvas, /* ID para o canvas injetado pelo JS */
+/* ESTILO PARA AS IMAGENS E PARA O CANVAS DO TEABLE MACHINE (CORRIGIDO) */
+#webcam-canvas, /* Novo ID para o canvas injetado pelo JS */
 #uploaded-image,
 #frozen-image {
     object-fit: contain;
