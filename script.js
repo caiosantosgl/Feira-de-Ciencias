@@ -1,5 +1,5 @@
 // URL do modelo da IA:
-const URL = "https://teachablemachine.withgoogle.com/models/-3-2Ngyl-/";
+const URL = "https://teachablemachine.withgoogle.com/models/-3-2Ngyl-/"; // Verifique se esta URL está correta
 
 let model, webcam, labelContainer, maxPredictions, barsContainer;
 let isWebcamActive = false;
@@ -7,7 +7,7 @@ let isPaused = false;
 let currentPredictionSource = null;
 let currentFacingMode = 'environment'; 
 
-// Limites de Confiança (Mantidos com Maior Tolerância)
+// Limites de Confiança (Tolerância Mantida)
 const CONFIDENCE_THRESHOLD_SUGGESTION = 0.30; 
 const CONFIDENCE_THRESHOLD_CONFIRM = 0.85; 
 
@@ -19,7 +19,7 @@ const toggleCameraButton = document.getElementById("toggleCameraButton");
 const frozenImage = document.getElementById("frozen-image");
 
 // ----------------------------------------------------
-// Funções de Inicialização e Controle de Câmera (Estáveis)
+// Funções de Inicialização e Controle de Câmera (Estabilizadas)
 // ----------------------------------------------------
 
 async function init() {
@@ -68,10 +68,11 @@ async function startWebcam() {
 
     } catch (e) {
         console.error("Erro grave ao iniciar a webcam:", e);
-        labelContainer.innerHTML = '<div class="disposal-inconclusivo">❌ Erro de Acesso! Verifique as **permissões da câmera** e se o dispositivo não está em uso por outro programa.</div>';
+        labelContainer.innerHTML = '<div class="disposal-inconclusivo">❌ Erro de Acesso! Verifique as **permissões da câmera** e se o dispositivo não está em uso.</div>';
         return;
     }
 
+    // Anexa o canvas gerado ao DOM para evitar que a webcam trave
     document.getElementById("prediction-area").prepend(webcam.canvas);
     webcam.canvas.id = "webcam-canvas";
     webcamVideo.style.display = 'none'; 
@@ -81,7 +82,8 @@ async function startWebcam() {
     currentPredictionSource = 'webcam';
     webcamButton.innerHTML = '<i class="fas fa-pause"></i> Pausar câmera';
     toggleCameraButton.disabled = false;
-    window.requestAnimationFrame(loop);
+    // Inicia o loop de predição, crucial para a webcam
+    window.requestAnimationFrame(loop); 
 }
 
 function pauseWebcam() {
@@ -204,16 +206,29 @@ function handleImageUpload(event) {
 
 
 // ----------------------------------------------------
-// Funções de Descarte e Predição (Mapeamento Reforçado)
+// Funções de Descarte e Predição (Mapeamento Reforçado e Otimizado)
 // ----------------------------------------------------
 
 function getDisposalInfo(className) {
     const lowerCaseName = className.toLowerCase().trim();
 
-    // Dicionário de Mapeamento Reforçado: 
-    // Usado para garantir que classes confusas ou ambíguas sejam mapeadas corretamente.
+    // Rótulos que o modelo pode retornar
+    // Adicionado "lixo comum" e "não reciclável" a Plástico, pois são o foco do seu problema (garrafa plástica).
 
-    // 1. **PAPEL/PAPELÃO (AZUL):** Prioriza rótulos que o modelo confunde com metal (Tetra Pak)
+    // 1. **PLÁSTICO (VERMELHA):** Priorizado para corrigir o erro da garrafa plástica.
+    const plasticLabels = ["plástico", "pote", "garrafa", "sacola", "lixo comum", "nao reciclav", "outros lixos", "rejeito"];
+    if (plasticLabels.some(label => lowerCaseName.includes(label))) {
+        return {
+            className: "disposal-plastico",
+            barClass: "bar-plastico",
+            material: "Plástico",
+            color: "VERMELHA",
+            icon: "fas fa-recycle",
+            instrucao: "Lave e seque. Lixo Comum/Não Reciclável é exibido como PLÁSTICO (VERMELHA) para fins de classificação do recipiente."
+        };
+    }
+
+    // 2. **PAPEL/PAPELÃO (AZUL):**
     const paperLabels = ["papel", "papelao", "leite", "caixa", "embalagem", "jornal", "revista", "caixas"];
     if (paperLabels.some(label => lowerCaseName.includes(label))) {
         return { 
@@ -225,21 +240,9 @@ function getDisposalInfo(className) {
             instrucao: "Embalagens Tetra Pak e papel/papelão limpos. Não descarte papéis sujos." 
         };
     }
-
-    // 2. **PLÁSTICO (VERMELHA):** Inclui a classe "plástico" e as classes de lixo comum/não reciclável para forçar o descarte na lixeira VERMELHA, conforme sua lógica original.
-    const plasticLabels = ["plástico", "pote", "garrafa", "sacola", "nao reciclav", "lixo comum", "outros lixos", "rejeito"];
-    if (plasticLabels.some(label => lowerCaseName.includes(label))) {
-        return {
-            className: "disposal-plastico",
-            barClass: "bar-plastico",
-            material: "Plástico",
-            color: "VERMELHA",
-            icon: "fas fa-recycle",
-            instrucao: "Lave e seque. Não descarte plásticos com resíduos tóxicos. Lixo Comum/Rejeito deve ir na lixeira VERMELHA (Plástico) ou CINZA (depende da prefeitura)."
-        };
-    }
-
-    // 3. **METAL (AMARELA):** const metalLabels = ["metal", "metais", "lata", "latinha", "ferro", "aluminio"];
+    
+    // 3. **METAL (AMARELA):**
+    const metalLabels = ["metal", "metais", "lata", "latinha", "ferro", "aluminio"];
     if (metalLabels.some(label => lowerCaseName.includes(label))) {
         return { 
             className: "disposal-metal", 
@@ -250,7 +253,7 @@ function getDisposalInfo(className) {
             instrucao: "Lave as latas e amasse. Cuidado com objetos pontiagudos." 
         };
     }
-    
+
     // 4. **VIDRO (VERDE):**
     const glassLabels = ["vidro", "garrafa", "pote", "copo"];
     if (glassLabels.some(label => lowerCaseName.includes(label))) {
@@ -264,7 +267,7 @@ function getDisposalInfo(className) {
         };
     }
 
-    // 5. **REJEITO/COMUM (Fallback Final)**
+    // 5. **REJEITO/COMUM (Fallback Final):** Se não for nenhum dos acima.
     return {
         className: "disposal-comum",
         barClass: "bar-comum",
@@ -314,6 +317,7 @@ async function predict(imageElement) {
     const probability = topPrediction.probability;
 
     // Garante que o contêiner receba a classe de descarte correta do item de maior probabilidade
+    // Esta linha é crucial para a cor da borda:
     labelContainer.classList.add(topInfo.className);
 
     let messageHTML = '';
