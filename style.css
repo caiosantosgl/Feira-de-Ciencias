@@ -67,25 +67,18 @@ main {
 }
 
 /* 2. Controles (Botões) */
-/* 2. Controles (Botões) - MUDANÇA AQUI: de column para row */
 #controls {
     display: flex;
     flex-direction: row;
-    /* Força os botões LADO A LADO */
     justify-content: center;
-    /* Centraliza horizontalmente */
     gap: 10px;
     margin-bottom: 15px;
     padding: 5px 0;
 }
 
-/* Remova ou ajuste a media query, se necessário */
 @media (max-width: 599px) {
-
-    /* Esta regra só é necessária se você quiser quebrar para coluna em telas MUITO pequenas */
     #controls {
         flex-wrap: wrap;
-        /* Permite quebrar, se o espaço acabar */
         font-size: 0.9em;
     }
 }
@@ -112,7 +105,6 @@ main {
 
 #toggleCameraButton {
     background-color: #555;
-    /* Cinza escuro para alternar */
     color: white;
     font-family: 'Montserrat', sans-serif;
 
@@ -148,14 +140,11 @@ main {
     text-align: center;
 }
 
-#webcam-video,
+/* ESTILO PARA AS IMAGENS E PARA O CANVAS DO TEABLE MACHINE (CORRIGIDO) */
+#webcam-canvas, /* Novo ID para o canvas injetado pelo JS */
 #uploaded-image,
 #frozen-image {
-    /* ... (outras regras de tamanho existentes) ... */
-
-    /* Regras para ajuste de imagem: */
     object-fit: contain;
-    /* Faz a imagem se ajustar (redimensionar) dentro do contêiner, mantendo a proporção. */
     width: 100%;
     max-width: 100%;
     aspect-ratio: 1 / 1;
@@ -165,8 +154,14 @@ main {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+/* Oculta o elemento <video> nativo */
+#webcam-video {
+    display: none !important; 
+}
+
+
 /* ---------------------------------------------------- */
-/* 4. Estilo das Barras de Predição */
+/* 4. Estilo das Barras de Predição (Mantido) */
 /* ---------------------------------------------------- */
 #bars-container {
     width: 100%;
@@ -242,7 +237,7 @@ main {
 
 
 /* ---------------------------------------------------- */
-/* 5. Contêiner de Mensagem Principal */
+/* 5. Contêiner de Mensagem Principal (Mantido) */
 /* ---------------------------------------------------- */
 
 .result-box {
