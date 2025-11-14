@@ -1,15 +1,15 @@
-// URL do modelo da IA (Mantida):
+// URL do modelo da IA:
 const URL = "https://teachablemachine.withgoogle.com/models/-3-2Ngyl-/";
 
 let model, webcam, labelContainer, maxPredictions, barsContainer;
 let isWebcamActive = false;
 let isPaused = false;
 let currentPredictionSource = null;
-let currentFacingMode = 'environment'; // Padrão: 'environment' (traseira)
+let currentFacingMode = 'environment'; 
 
 // Limites de Confiança
-const CONFIDENCE_THRESHOLD_SUGGESTION = 0.40; // 40% para "Eu acredito que seja..."
-const CONFIDENCE_THRESHOLD_CONFIRM = 0.85; // 85% para certeza total
+const CONFIDENCE_THRESHOLD_SUGGESTION = 0.40;
+const CONFIDENCE_THRESHOLD_CONFIRM = 0.85; 
 
 // Elementos HTML
 const webcamVideo = document.getElementById("webcam-video");
@@ -19,7 +19,7 @@ const toggleCameraButton = document.getElementById("toggleCameraButton");
 const frozenImage = document.getElementById("frozen-image");
 
 // ----------------------------------------------------
-// Funções de Inicialização e Controle de Câmera
+// Funções de Inicialização e Controle de Câmera (CORRIGIDAS)
 // ----------------------------------------------------
 
 async function init() {
@@ -31,20 +31,20 @@ async function init() {
         maxPredictions = model.getTotalClasses();
         labelContainer = document.getElementById("label-container");
         barsContainer = document.getElementById("bars-container");
+        toggleCameraButton.disabled = true; 
     } catch (e) {
-        document.getElementById("label-container").innerHTML = '<p class="disposal-inconclusivo" style="color: red;">Erro ao carregar o modelo de IA. Verifique a URL.</p>';
+        document.getElementById("label-container").innerHTML = '<p class="disposal-inconclusivo" style="color: red;">Erro ao carregar o modelo de IA. Verifique a URL do modelo.</p>';
         console.error("Erro ao carregar o modelo de IA:", e);
     }
 }
 
 async function startWebcam() {
-    // 1. Verifica se o modelo está carregado 
     if (!model) {
         labelContainer.innerHTML = '<p style="color: red;">Modelo de IA não carregado. Verifique a URL do modelo no script.js.</p>';
         return;
     }
 
-    // 2. Lógica de clique (Pausa/Resumo)
+    // Lógica de Pausa/Resumo do loop
     if (isWebcamActive) {
         if (isPaused) {
             resumeWebcam();
@@ -54,7 +54,7 @@ async function startWebcam() {
         return;
     }
 
-    // 3. Inicializa a Webcam
+    // Inicializa a Webcam (NOVO INÍCIO)
     uploadedImage.style.display = 'none';
     frozenImage.style.display = 'none';
     const width = 400;
@@ -70,50 +70,48 @@ async function startWebcam() {
 
     } catch (e) {
         console.error("Erro grave ao iniciar a webcam:", e);
-        labelContainer.innerHTML = '<div class="disposal-inconclusivo">❌ Erro de Acesso! Verifique as **permissões da câmera** e se o dispositivo não está em uso por outro programa.</div>';
+        labelContainer.innerHTML = '<div class="disposal-inconclusivo">❌ Erro de Acesso! Verifique as **permissões da câmera** e se o dispositivo não está em uso.</div>';
         return;
     }
 
-    // Sucesso na inicialização
-    webcamVideo.style.display = 'block';
-    webcamVideo.srcObject = webcam.webcam.srcObject; // Associa a stream ao elemento <video>
+    // Sucesso na inicialização: Anexa o canvas gerado ao DOM
+    document.getElementById("prediction-area").prepend(webcam.canvas);
+    webcam.canvas.id = "webcam-canvas";
+    
+    // Oculta elementos desnecessários
+    webcamVideo.style.display = 'none'; 
+
     isWebcamActive = true;
     isPaused = false;
     currentPredictionSource = 'webcam';
     webcamButton.innerHTML = '<i class="fas fa-pause"></i> Pausar câmera';
-    toggleCameraButton.disabled = false; // Habilita o alternador
-    window.requestAnimationFrame(loop); // Inicia o loop
+    toggleCameraButton.disabled = false;
+    window.requestAnimationFrame(loop);
 }
 
-// FUNÇÃO CORRIGIDA DE PAUSA: Tira um snapshot e congela a imagem
+// FUNÇÃO CORRIGIDA DE PAUSA
 function pauseWebcam() {
     if (!isWebcamActive || isPaused) return;
 
     if (webcam && webcam.canvas) {
-        webcam.update(); // Garante o último frame
+        webcam.update();
 
         // Tira um snapshot do canvas
         const snapshot = webcam.canvas.toDataURL('image/jpeg', 1.0);
 
-        // Exibe o snapshot no elemento #frozen-image
+        // Esconde o canvas ao vivo e mostra o snapshot
+        webcam.canvas.style.display = 'none';
         frozenImage.src = snapshot;
         frozenImage.style.display = 'block';
 
-        // Copia o tamanho para o congelamento ficar no lugar certo
-        frozenImage.style.width = webcamVideo.clientWidth + 'px'; // Usa clientWidth/Height para o tamanho real
-        frozenImage.style.height = webcamVideo.clientHeight + 'px';
     }
 
-    // Esconde o elemento de vídeo ao vivo
-    webcamVideo.style.display = 'none';
-
-    // Atualiza o estado para parar o loop
     isPaused = true;
     webcamButton.innerHTML = '<i class="fas fa-play"></i> ▶️Despausar';
     labelContainer.innerHTML = '<p class="initial-message" style="color: #007bff;">⏸️ Câmera Pausada</p>';
 }
 
-// FUNÇÃO CORRIGIDA DE RESUMO: Remove o snapshot e reativa o vídeo
+// FUNÇÃO CORRIGIDA DE RESUMO
 async function resumeWebcam() {
     if (!isWebcamActive || !isPaused) return;
 
@@ -121,10 +119,12 @@ async function resumeWebcam() {
     frozenImage.style.display = 'none';
     frozenImage.src = '';
 
-    // Reativa o vídeo ao vivo
-    webcamVideo.style.display = 'block';
+    // Reativa o canvas
+    const canvas = document.getElementById("webcam-canvas");
+    if (canvas) {
+        canvas.style.display = 'block';
+    }
 
-    // Atualiza o estado e retoma o loop
     isPaused = false;
     webcamButton.innerHTML = '<i class="fas fa-pause"></i> Pausar câmera';
     window.requestAnimationFrame(loop);
@@ -138,8 +138,13 @@ async function stopWebcam() {
             webcam.webcam.srcObject = null;
         }
     }
+    
+    // Remove o canvas injetado do DOM
+    const canvas = document.getElementById("webcam-canvas");
+    if (canvas) {
+        canvas.remove();
+    }
 
-    // Assegura que todos os elementos de visualização sejam escondidos
     webcamVideo.style.display = 'none';
     uploadedImage.style.display = 'none';
     frozenImage.style.display = 'none';
@@ -159,13 +164,9 @@ async function stopWebcam() {
 async function toggleCameraDirection() {
     if (!isWebcamActive) return;
 
-    // 1. Inverte o modo
     currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
 
-    // 2. Desliga a câmera atual
     await stopWebcam();
-
-    // 3. Reinicia a câmera com o novo modo
     await startWebcam();
 
     const directionText = (currentFacingMode === 'environment') ? 'Traseira' : 'Frontal';
@@ -173,9 +174,8 @@ async function toggleCameraDirection() {
 }
 
 async function loop() {
-    // Se a webcam estiver ativa E NÃO pausada, continua a predição
     if (isWebcamActive && !isPaused && currentPredictionSource === 'webcam') {
-        webcam.update();
+        webcam.update(); 
         await predict(webcam.canvas);
         window.requestAnimationFrame(loop);
     }
@@ -184,7 +184,6 @@ async function loop() {
 function handleImageUpload(event) {
     if (!model) { labelContainer.innerHTML = '<p style="color: red;">Modelo de IA não carregado.</p>'; return; }
 
-    // Garante que a webcam seja parada e escondida antes de mostrar a imagem
     if (isWebcamActive) {
         stopWebcam();
         webcamButton.innerHTML = '<i class="fas fa-video"></i> Iniciar câmera';
@@ -196,9 +195,9 @@ function handleImageUpload(event) {
 
         reader.onload = function (e) {
             uploadedImage.src = e.target.result;
-            uploadedImage.style.display = 'block'; // Mostra a imagem
-            webcamVideo.style.display = 'none'; // Esconde o vídeo 
-            frozenImage.style.display = 'none'; // Esconde o congelamento
+            uploadedImage.style.display = 'block';
+            webcamVideo.style.display = 'none'; 
+            frozenImage.style.display = 'none'; 
 
             uploadedImage.onload = function () {
                 currentPredictionSource = 'image';
@@ -220,13 +219,13 @@ function handleImageUpload(event) {
 
 
 // ----------------------------------------------------
-// Funções de Descarte e Predição (Mantidas)
+// Funções de Descarte e Predição (Mapeamento de Plástico Forçado)
 // ----------------------------------------------------
 
 function getDisposalInfo(className) {
     const lowerCaseName = className.toLowerCase();
 
-    // ⚠️ ATENÇÃO: Verifique se estes nomes correspondem às classes do seu modelo!
+    // Rótulos que devem ser forçados como PLÁSTICO
     const plasticForceLabels = ["não reciclável", "lixo comum", "outros lixos", "plástico"];
 
     // 1. PLÁSTICO (e classes forçadas)
@@ -256,7 +255,7 @@ function getDisposalInfo(className) {
         return { className: "disposal-papel", barClass: "bar-papel", material: "Papel/Papelão", color: "AZUL", icon: "fas fa-file-alt", instrucao: "Não descarte papéis molhados, sujos ou engordurados, eles são rejeitos." };
     }
 
-    // 5. REJEITO/COMUM
+    // 5. REJEITO/COMUM (Fallback)
     return {
         className: "disposal-comum",
         barClass: "bar-comum",
