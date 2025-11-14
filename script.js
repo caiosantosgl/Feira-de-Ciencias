@@ -130,12 +130,16 @@ async function resumeWebcam() {
     window.requestAnimationFrame(loop);
 }
 
+// FUNÇÃO CORRIGIDA PARA LIBERAR O RECURSO DA CÂMERA
 async function stopWebcam() {
     if (webcam) {
+        // 1. Interrompe a predição e os tracks de mídia
         webcam.stop();
         if (webcam.webcam.srcObject) {
             webcam.webcam.srcObject.getTracks().forEach(track => track.stop());
-            webcam.webcam.srcObject = null;
+            
+            // 2. CORREÇÃO CRÍTICA: Limpa a referência do stream para liberar o recurso
+            webcam.webcam.srcObject = null; 
         }
     }
     
@@ -161,13 +165,17 @@ async function stopWebcam() {
     barsContainer.innerHTML = '';
 }
 
+// FUNÇÃO CORRIGIDA DE ALTERNÂNCIA
 async function toggleCameraDirection() {
     if (!isWebcamActive) return;
 
     currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
 
+    // Garante que a câmera seja parada e o recurso liberado
     await stopWebcam();
-    await startWebcam();
+    
+    // Inicia a câmera com o novo modo
+    startWebcam();
 
     const directionText = (currentFacingMode === 'environment') ? 'Traseira' : 'Frontal';
     toggleCameraButton.innerHTML = `<i class="fas fa-sync-alt"></i> Câmera ${directionText}`;
